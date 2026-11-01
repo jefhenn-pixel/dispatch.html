@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopOn Local - Dispatch & Navigation</title>
+    
+    <!-- Mobile App & Icon Settings -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HopOn Local">
+    <meta name="theme-color" content="#f59e0b">
+    
+    <!-- Custom Taxi / Car Icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23111827'/><path d='M20 58 C20 48, 30 42, 50 42 C70 42, 80 48, 80 58 L82 70 C82 74, 78 78, 74 78 L26 78 C22 78, 18 74, 18 70 Z' fill='%23f59e0b'/><path d='M32 44 L38 32 C40 28, 60 28, 62 32 L68 44 Z' fill='%23f59e0b'/><circle cx='32' cy='68' r='6' fill='%23ffffff'/><circle cx='68' cy='68' r='6' fill='%23ffffff'/><rect x='42' y='22' width='16' height='8' rx='2' fill='%23f59e0b'/><text x='50' y='28' font-size='6' font-weight='bold' fill='%23111827' text-anchor='middle'>TAXI</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23111827'/><path d='M20 58 C20 48, 30 42, 50 42 C70 42, 80 48, 80 58 L82 70 C82 74, 78 78, 74 78 L26 78 C22 78, 18 74, 18 70 Z' fill='%23f59e0b'/><path d='M32 44 L38 32 C40 28, 60 28, 62 32 L68 44 Z' fill='%23f59e0b'/><circle cx='32' cy='68' r='6' fill='%23ffffff'/><circle cx='68' cy='68' r='6' fill='%23ffffff'/><rect x='42' y='22' width='16' height='8' rx='2' fill='%23f59e0b'/><text x='50' y='28' font-size='6' font-weight='bold' fill='%23111827' text-anchor='middle'>TAXI</text></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .touch-action { touch-action: manipulation; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-16 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-900 text-xl shadow">
+                    <i class="fa-solid fa-taxi"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">HopOn Local</h1>
+                    <p class="text-xs text-amber-400 font-medium">Bonteheuwel Dispatch Dashboard</p>
+                </div>
+            </div>
+            <button onclick="requestNotificationPermission()" id="notifyBtn" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs text-amber-400 flex items-center space-x-1 border border-slate-600">
+                <i class="fa-solid fa-bell"></i>
+                <span id="notifyBtnText">Enable Alerts</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 pt-4 space-y-4">
+
+        <!-- Quick Presets -->
+        <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700/60 shadow-lg">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Quick Presets
+            </h2>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="applyPreset('Bonteheuwel Internal', 2.0, 30)" class="touch-action bg-slate-700/70 hover:bg-slate-700 border border-slate-600 rounded-xl p-2.5 text-center transition active:scale-95">
+                    <div class="text-xs text-slate-400 font-medium">Bht Internal</div>
+                    <div class="text-lg font-bold text-amber-400">R30</div>
+                </button>
+                <button onclick="applyPreset('Vangate Mall', 4.0, 50)" class="touch-action bg-slate-700/70 hover:bg-slate-700 border border-slate-600 rounded-xl p-2.5 text-center transition active:scale-95">
+                    <div class="text-xs text-slate-400 font-medium">Vangate Mall</div>
+                    <div class="text-lg font-bold text-amber-400">R50 <span class="text-[10px] text-slate-400 font-normal">(Cap)</span></div>
+                </button>
+                <button onclick="applyPreset('Cape Town CBD', 16.5, 140)" class="touch-action bg-slate-700/70 hover:bg-slate-700 border border-slate-600 rounded-xl p-2.5 text-center transition active:scale-95">
+                    <div class="text-xs text-slate-400 font-medium">Cape Town CBD</div>
+                    <div class="text-lg font-bold text-amber-400">R140</div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Dispatch Form -->
+        <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700/60 shadow-lg space-y-4">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <i class="fa-solid fa-calculator text-amber-400 mr-1"></i> Ride Calculator & Dispatch
+            </h2>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Passenger Name</label>
+                    <input type="text" id="passengerName" placeholder="e.g. John / Auntie Sarah" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Pickup Location</label>
+                        <input type="text" id="pickupAddr" value="Bonteheuwel" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Destination</label>
+                        <input type="text" id="destAddr" placeholder="e.g. Vangate Mall" oninput="calculateFare()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-medium text-slate-300">Distance (km)</label>
+                        <span id="calcDetails" class="text-[11px] text-slate-400">R20 Base + R8/km (Min R30)</span>
+                    </div>
+                    <input type="number" id="tripDistance" step="0.1" min="0" placeholder="e.g. 7.4" oninput="calculateFare()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <!-- Calculated Output -->
+            <div class="bg-slate-900/90 rounded-xl p-4 border border-amber-500/30 flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-slate-400">Total Calculated Fare</div>
+                    <div class="text-2xl font-black text-amber-400" id="fareDisplay">R30.00</div>
+                    <div class="text-[10px] text-slate-400" id="ruleAppliedNotice">Minimum floor applied (R30)</div>
+                </div>
+                <button onclick="dispatchRide()" class="touch-action bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-lg transition active:scale-95 text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Dispatch</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Live Queue with Maps & Waze Links -->
+        <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700/60 shadow-lg space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <i class="fa-solid fa-list-check text-amber-400 mr-1"></i> Active Queue & Navigation
+                </h2>
+                <button onclick="clearQueue()" class="text-xs text-slate-500 hover:text-red-400">Clear Queue</button>
+            </div>
+
+            <div id="queueList" class="space-y-2">
+                <div class="text-center py-6 text-slate-500 text-xs italic">
+                    No active dispatches yet.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        let currentFare = 30;
+        let isOverridePreset = false;
+        let rides = JSON.parse(localStorage.getItem('hopon_rides') || '[]');
+
+        function calculateFare() {
+            if (isOverridePreset) return;
+
+            const distInput = document.getElementById('tripDistance').value;
+            const destInput = document.getElementById('destAddr').value.toLowerCase();
+            const distance = parseFloat(distInput) || 0;
+
+            const baseFee = 20;
+            const perKmRate = 8;
+            const minFare = 30;
+            const vangateCap = 50;
+
+            let calculated = baseFee + (distance * perKmRate);
+            let notice = "";
+
+            if (destInput.includes("vangate") || (destInput.includes("mall") && distance <= 5)) {
+                if (calculated > vangateCap) {
+                    calculated = vangateCap;
+                    notice = "Vangate Mall local cap applied (R50 max)";
+                }
+            }
+
+            if (calculated < minFare) {
+                calculated = minFare;
+                notice = "Minimum floor applied (R30)";
+            } else if (!notice) {
+                notice = `Standard Rate: R20 + (${distance}km × R8)`;
+            }
+
+            currentFare = Math.round(calculated);
+            document.getElementById('fareDisplay').innerText = "R" + currentFare + ".00";
+            document.getElementById('ruleAppliedNotice').innerText = notice;
+        }
+
+        function applyPreset(name, km, price) {
+            isOverridePreset = true;
+            document.getElementById('destAddr').value = name;
+            document.getElementById('tripDistance').value = km;
+            currentFare = price;
+            document.getElementById('fareDisplay').innerText = "R" + price + ".00";
+            document.getElementById('ruleAppliedNotice').innerText = `Preset Applied: ${name}`;
+            setTimeout(() => { isOverridePreset = false; }, 2000);
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        document.getElementById('notifyBtnText').innerText = "Alerts Active";
+                        document.getElementById('notifyBtn').classList.replace("bg-slate-700", "bg-emerald-600/30");
+                        new Notification("HopOn Local", { body: "Dispatch notifications enabled!" });
+                    }
+                });
+            }
+        }
+
+        function sendPushNotification(passenger, destination, fare) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`🚕 New Trip Dispatched: R${fare}`, {
+                    body: `${passenger} → ${destination}`
+                });
+            }
+        }
+
+        function dispatchRide() {
+            const passenger = document.getElementById('passengerName').value.trim() || 'Passenger';
+            const pickup = document.getElementById('pickupAddr').value.trim() || 'Bonteheuwel';
+            const destination = document.getElementById('destAddr').value.trim() || 'Local Area';
+            const distance = document.getElementById('tripDistance').value || '0';
+
+            const ride = {
+                id: Date.now(),
+                passenger,
+                pickup,
+                destination,
+                distance,
+                fare: currentFare,
+                status: 'Dispatched',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            rides.unshift(ride);
+            saveAndUpdate();
+            sendPushNotification(passenger, destination, currentFare);
+
+            document.getElementById('passengerName').value = '';
+            document.getElementById('destAddr').value = '';
+            document.getElementById('tripDistance').value = '';
+            currentFare = 30;
+            document.getElementById('fareDisplay').innerText = "R30.00";
+            document.getElementById('ruleAppliedNotice').innerText = "Minimum floor applied (R30)";
+        }
+
+        function renderQueue() {
+            const list = document.getElementById('queueList');
+            if (rides.length === 0) {
+                list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs italic">No active dispatches yet.</div>`;
+                return;
+            }
+
+            list.innerHTML = rides.map(r => {
+                const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(r.pickup)}&destination=${encodeURIComponent(r.destination)}&travelmode=driving`;
+                const wazeUrl = `https://waze.com/ul?q=${encodeURIComponent(r.destination)}&navigate=yes`;
+
+                return `
+                    <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-700/80 space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <div class="font-bold text-white text-sm">${r.passenger} <span class="text-slate-400 font-normal">(${r.time})</span></div>
+                            <div class="text-base font-bold text-amber-400">R${r.fare}</div>
+                        </div>
+                        <div class="text-slate-300">${r.pickup} → <span class="text-amber-300 font-medium">${r.destination}</span> (${r.distance} km)</div>
+                        
+                        <!-- Navigation & Actions Bar -->
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800 gap-1">
+                            <div class="flex space-x-1">
+                                <a href="${gmapsUrl}" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 py-1 rounded text-[11px] text-blue-400 flex items-center space-x-1">
+                                    <i class="fa-solid fa-map-location-dot"></i> <span>Maps</span>
+                                </a>
+                                <a href="${wazeUrl}" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 py-1 rounded text-[11px] text-cyan-400 flex items-center space-x-1">
+                                    <i class="fa-solid fa-diamond-turn-right"></i> <span>Waze</span>
+                                </a>
+                            </div>
+                            <button onclick="copyWhatsAppSummary(${r.id})" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2 py-1 rounded text-[11px] text-emerald-400 flex items-center space-x-1">
+                                <i class="fa-brands fa-whatsapp"></i> <span>WhatsApp</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function copyWhatsAppSummary(id) {
+            const ride = rides.find(r => r.id === id);
+            if (!ride) return;
+            const text = `🚕 *HopOn Local Dispatch*\n👤 *Passenger:* ${ride.passenger}\n📍 *Pickup:* ${ride.pickup}\n🏁 *Drop-off:* ${ride.destination}\n📏 *Distance:* ${ride.distance} km\n💰 *Total Fare:* R${ride.fare}.00`;
+            navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+        }
+
+        function saveAndUpdate() {
+            localStorage.setItem('hopon_rides', JSON.stringify(rides));
+            renderQueue();
+        }
+
+        function clearQueue() {
+            if (confirm("Clear queue?")) { rides = []; saveAndUpdate(); }
+        }
+
+        // Automatic polling loop to instantly pick up bookings from the passenger page
+        setInterval(function() {
+            const storedRides = JSON.parse(localStorage.getItem('hopon_rides') || '[]');
+            if (storedRides.length !== rides.length) {
+                rides = storedRides;
+                renderQueue();
+            }
+        }, 1500);
+
+        // Initial render on load
+        renderQueue();
+    </script>
+</body>
+</html>
